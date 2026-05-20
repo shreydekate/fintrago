@@ -1,2 +1,2 @@
-# fintrago
-Financial tracker
+# Fintrago
+AI-powered Financial tracker
