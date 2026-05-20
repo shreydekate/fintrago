@@ -1,0 +1,2 @@
+# fintrago
+Financial tracker
