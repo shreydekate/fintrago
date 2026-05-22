@@ -23,19 +23,8 @@ func Load() *Config {
 	}
 }
 
-// parameters: 'key' will be our key from a mapping in the env file and 'fallback' is there incase the key has no value
+// getEnv returns the value of key from the environment, or fallback if unset.
 func getEnv(key, fallback string) string {
-	/*
-		Go uses this format for if statements:
-
-		if INITIALIZATION; CONDITION {
-			LOGIC
-		}
-
-		The os.Getenv() returns the value for the respective key we provide so in this case
-		our code will store the value of the env key into value 'val'
-
-	*/
 	if val := os.Getenv(key); val != "" {
 		return val
 	}
