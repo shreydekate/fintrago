@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shredekate/fintrago/db"
+	"github.com/shreydekate/fintrago/db"
 	"github.com/shreydekate/fintrago/models"
 )
 
@@ -36,7 +36,7 @@ func CreateTransaction(c *gin.Context) {
 }
 
 func ListTransactions(c *gin.Context) {
-	row, err := db.pool.Query(
+	row, err := db.Pool.Query(
 		context.Background(),
 		`SELECT ID, user_id, type, amount, category, description, date, created_at FROM transactions`,
 	)
@@ -46,19 +46,38 @@ func ListTransactions(c *gin.Context) {
 	defer row.Close() // tf is ts?
 
 	var transactions []models.Transaction
-	for rows.Next() {
-		// End Here
+	for row.Next() {
+		var t models.Transaction
+		err := row.Scan(&t.ID, &t.UserID, &t.Type, &t.Amount, &t.Category, &t.Description, &t.Date, &t.CreatedAt)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		transactions = append(transactions, t)
 	}
+	if transactions == nil {
+		transactions = []models.Transaction{} // Return an empty array instead of null
+	}
+	c.JSON(http.StatusOK, transactions)
 }
 
 func DeleteTransaction(c *gin.Context) {
 	id := c.Param("id")
-	for i, t := range store {
-		if t.ID == id {
-			store = append(store[:i], store[i+1:]...) // Deleting elements from a slice (idiomatic)
-			c.JSON(http.StatusOK, gin.H{"message": "Poof Gone Forever"})
-			return
-		}
+
+	result, err := db.Pool.Exec(
+		context.Background(),
+		`DELETE FROM transactions WHERE id = $1`,
+		id,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
-	c.JSON(http.StatusNotFound, gin.H{"error": "Transaction not found"})
+
+	if result.RowsAffected() == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Transaction not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Transaction deleted"})
 }
