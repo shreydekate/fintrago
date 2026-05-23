@@ -25,7 +25,7 @@ func CreateTransaction(c *gin.Context) {
 		context.Background(),
 		`INSERT INTO transactions (user_id, type, amount, category, description, date)
 		 VALUES ($1, $2, $3, $4, $5, $6)
-		 RETURNING id, created at`,
+		 RETURNING id, created_at`,
 		t.UserID, t.Type, t.Amount, t.Category, t.Description, t.Date).Scan(&t.ID, &t.CreatedAt)
 
 	if err != nil {
@@ -38,12 +38,13 @@ func CreateTransaction(c *gin.Context) {
 func ListTransactions(c *gin.Context) {
 	row, err := db.Pool.Query(
 		context.Background(),
-		`SELECT ID, user_id, type, amount, category, description, date, created_at FROM transactions`,
+		`SELECT id, user_id, type, amount, category, description, date, created_at FROM transactions`,
 	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
-	defer row.Close() // tf is ts?
+	defer row.Close() // basically closing the database connection since we are done with it
 
 	var transactions []models.Transaction
 	for row.Next() {
