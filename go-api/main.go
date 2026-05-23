@@ -5,13 +5,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/shreydekate/fintrago/config"
-	"github.com/shreydekate/fintrago/db"
 	"github.com/shreydekate/fintrago/routes"
 )
 
 func main() {
 	cfg := config.Load()
-	db.Connect(cfg.DatabaseURL)
+	// db.Connect(cfg.DatabaseURL)
 
 	r := gin.Default()
 	routes.Register(r)
